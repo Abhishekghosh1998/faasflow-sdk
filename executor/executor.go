@@ -8,9 +8,9 @@ import (
 	"net/url"
 	"strconv"
 
+	sdk "github.com/Abhishekghosh1998/faasflow-sdk"
 	hmac "github.com/alexellis/hmac"
 	xid "github.com/rs/xid"
-	sdk "github.com/faasflow/sdk"
 )
 
 // RawRequest a raw request for the flow
@@ -27,15 +27,20 @@ type PartialState struct {
 }
 
 func DecodePartialReq(encodedState []byte) (*PartialState, error) {
+
+	fmt.Println("sdk/executor/executor.go: DecodePartialReq start")
 	request, err := decodeRequest(encodedState)
 	if err != nil {
 		return nil, err
 	}
 	req := &PartialState{uprequest: request}
+	fmt.Println("sdk/executor/executor.go: DecodePartialReq end")
 	return req, err
 }
 
 func (req *PartialState) Encode() ([]byte, error) {
+	fmt.Println("sdk/executor/executor.go: Encode start")
+	fmt.Println("sdk/executor/executor.go: Encode end")
 	return req.uprequest.encode()
 }
 
@@ -122,12 +127,18 @@ type ExecutionStateOptions struct {
 type ExecutionStateOption func(*ExecutionStateOptions)
 
 func NewRequest(request *RawRequest) ExecutionStateOption {
+
+	fmt.Println("sdk/executor/executor.go: NewRequest start")
+	fmt.Println("sdk/executor/executor.go: NewRequest end")
 	return func(o *ExecutionStateOptions) {
 		o.newRequest = request
 	}
 }
 
 func PartialRequest(partialState *PartialState) ExecutionStateOption {
+
+	fmt.Println("sdk/executor/executor.go: PartialRequest start")
+	fmt.Println("sdk/executor/executor.go: PartialRequest end")
 	return func(o *ExecutionStateOptions) {
 		o.partialState = partialState
 	}
@@ -142,45 +153,62 @@ const (
 
 // log logs using logger if logging enabled
 func (fexec *FlowExecutor) log(str string, a ...interface{}) {
+
+	fmt.Println("sdk/executor/executor.go: log start")
 	if fexec.executor.LoggingEnabled() {
 		str := fmt.Sprintf(str, a...)
 		fexec.logger.Log(str)
 	}
+	fmt.Println("sdk/executor/executor.go: log end")
 }
 
 // setRequestState set the request state
 func (fexec *FlowExecutor) setRequestState(state string) error {
+
+	fmt.Println("sdk/executor/executor.go: setRequestState start")
+	fmt.Println("sdk/executor/executor.go: setRequestState end")
 	return fexec.stateStore.Set("request-state", state)
 }
 
 // getRequestState get state of the request
 func (fexec *FlowExecutor) getRequestState() (string, error) {
+
+	fmt.Println("sdk/executor/executor.go: getRequestState start")
 	value, err := fexec.stateStore.Get("request-state")
+	fmt.Println("sdk/executor/executor.go: getRequestState end")
 	return value, err
 }
 
 // setDynamicBranchOptions set dynamic options for a dynamic node
 func (fexec *FlowExecutor) setDynamicBranchOptions(nodeUniqueId string, options []string) error {
+
+	fmt.Println("sdk/executor/executor.go: setDynamicBranchOptions start")
 	encoded, err := json.Marshal(options)
 	if err != nil {
 		return err
 	}
+	fmt.Println("sdk/executor/executor.go: setDynamicBranchOptions end")
 	return fexec.stateStore.Set(nodeUniqueId, string(encoded))
 }
 
 // getDynamicBranchOptions get dynamic options for a dynamic node
 func (fexec *FlowExecutor) getDynamicBranchOptions(nodeUniqueId string) ([]string, error) {
+
+	fmt.Println("sdk/executor/executor.go: getDynamicBranchOptions start")
 	encoded, err := fexec.stateStore.Get(nodeUniqueId)
 	if err != nil {
 		return nil, err
 	}
 	var option []string
 	err = json.Unmarshal([]byte(encoded), &option)
+	fmt.Println("sdk/executor/executor.go: getDynamicBranchOptions end")
 	return option, err
 }
 
 // incrementCounter increment counter by given term, if doesn't exist init with increment by
 func (fexec *FlowExecutor) incrementCounter(counter string, incrementBy int) (int, error) {
+
+	fmt.Println("sdk/executor/executor.go: incrementCounter start")
 	var serr error
 	count := 0
 	for i := 0; i < counterUpdateRetryCount; i++ {
@@ -209,11 +237,14 @@ func (fexec *FlowExecutor) incrementCounter(counter string, incrementBy int) (in
 		}
 		serr = err
 	}
+	fmt.Println("sdk/executor/executor.go: incrementCounter end")
 	return 0, fmt.Errorf("failed to update counter after max retry for %s, error %v", counter, serr)
 }
 
 // retrieveCounter retrieves a counter value
 func (fexec *FlowExecutor) retrieveCounter(counter string) (int, error) {
+
+	fmt.Println("sdk/executor/executor.go: retrieveCounter start")
 	encoded, err := fexec.stateStore.Get(counter)
 	if err != nil {
 		return 0, fmt.Errorf("failed to get counter %s, error %v", counter, err)
@@ -222,11 +253,13 @@ func (fexec *FlowExecutor) retrieveCounter(counter string) (int, error) {
 	if err != nil {
 		return 0, fmt.Errorf("failed to get counter %s, error %v", counter, err)
 	}
+	fmt.Println("sdk/executor/executor.go: retrieveCounter end")
 	return current, nil
 }
 
 func (fexec *FlowExecutor) storePartialState(partialState *PartialState) error {
 
+	fmt.Println("sdk/executor/executor.go: storePartialState start")
 	data, _ := partialState.Encode()
 	enState := string(data)
 
@@ -263,11 +296,13 @@ func (fexec *FlowExecutor) storePartialState(partialState *PartialState) error {
 		}
 		serr = err
 	}
+	fmt.Println("sdk/executor/executor.go: storePartialState end")
 	return fmt.Errorf("failed to update partial-state after max retry, error %v", serr)
 }
 
 func (fexec *FlowExecutor) retrievePartialStates() ([]*PartialState, error) {
 
+	fmt.Println("sdk/executor/executor.go: retrievePartialStates start")
 	key := "partial-state"
 	var encodedStates []string
 	var partialStates []*PartialState
@@ -289,44 +324,53 @@ func (fexec *FlowExecutor) retrievePartialStates() ([]*PartialState, error) {
 		}
 		partialStates = append(partialStates, ps)
 	}
+	fmt.Println("sdk/executor/executor.go: retrievePartialStates end")
 	return partialStates, nil
 }
 
 // isActive check if flow is active
 func (fexec *FlowExecutor) isActive() bool {
+
+	fmt.Println("sdk/executor/executor.go: isActive start")
 	state, err := fexec.getRequestState()
 	if err != nil {
 		fexec.log("[Request `%s`] Failed to obtain pipeline state, error %v\n", fexec.id, err)
 		return false
 	}
-
+	fmt.Println("sdk/executor/executor.go: isActive end")
 	return state == STATE_RUNNING || state == STATE_PAUSED
 }
 
 // isRunning check if flow is running
 func (fexec *FlowExecutor) isRunning() bool {
+
+	fmt.Println("sdk/executor/executor.go: isRunning start")
 	state, err := fexec.getRequestState()
 	if err != nil {
 		fexec.log("[Request `%s`] Failed to obtain pipeline state\n", fexec.id)
 		return false
 	}
-
+	fmt.Println("sdk/executor/executor.go: isRunning end")
 	return state == STATE_RUNNING
 }
 
 // isPaused check if flow is paused
 func (fexec *FlowExecutor) isPaused() bool {
+
+	fmt.Println("sdk/executor/executor.go: isPaused start")
 	state, err := fexec.getRequestState()
 	if err != nil {
 		fexec.log("[Request `%s`] Failed to obtain pipeline state\n", fexec.id)
 		return false
 	}
-
+	fmt.Println("sdk/executor/executor.go: isPaused end")
 	return state == STATE_PAUSED
 }
 
 // executeNode  executes a node on a faas-flow dag
 func (fexec *FlowExecutor) executeNode(request []byte) ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: executeNode start")
 	var result []byte
 	var err error
 
@@ -372,11 +416,14 @@ func (fexec *FlowExecutor) executeNode(request []byte) ([]byte, error) {
 
 	fexec.log("[Request `%s`] Completed execution of Node %s\n", fexec.id, currentNode.GetUniqueId())
 
+	fmt.Println("sdk/executor/executor.go: executeNode end")
 	return result, nil
 }
 
 // findCurrentNodeToExecute find right node to execute based on state
 func (fexec *FlowExecutor) findCurrentNodeToExecute() {
+
+	fmt.Println("sdk/executor/executor.go: findCurrentNodeToExecute start")
 	currentNode, currentDag := fexec.flow.GetCurrentNodeDag()
 
 	fexec.log("[Request `%s`] Executing node %s\n", fexec.id, currentNode.GetUniqueId())
@@ -400,10 +447,13 @@ func (fexec *FlowExecutor) findCurrentNodeToExecute() {
 		currentNode = currentDag.GetInitialNode()
 		fexec.flow.UpdatePipelineExecutionPosition(sdk.DEPTH_INCREMENT, currentNode.Id)
 	}
+	fmt.Println("sdk/executor/executor.go: findCurrentNodeToExecute end")
 }
 
 // forwardState forward async request to faasflow
 func (fexec *FlowExecutor) forwardState(currentNodeId string, nextNodeId string, result []byte) error {
+
+	fmt.Println("sdk/executor/executor.go: forwardState start")
 	var sign string
 	store := make(map[string][]byte)
 
@@ -452,11 +502,14 @@ func (fexec *FlowExecutor) forwardState(currentNodeId string, nextNodeId string,
 		return err
 	}
 
+	fmt.Println("sdk/executor/executor.go: forwardState end")
 	return nil
 }
 
 // executeDynamic executes a dynamic node
 func (fexec *FlowExecutor) executeDynamic(context *sdk.Context, result []byte) ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: executeDynamic start")
 	// get pipeline
 	pipeline := fexec.flow
 
@@ -594,11 +647,14 @@ func (fexec *FlowExecutor) executeDynamic(context *sdk.Context, result []byte) (
 		delete(pipeline.CurrentDynamicOption, currentNode.GetUniqueId())
 	}
 
+	fmt.Println("sdk/executor/executor.go: executeDynamic end")
 	return []byte(""), nil
 }
 
 // findNextNodeToExecute find the next node(s) to execute after the current node
 func (fexec *FlowExecutor) findNextNodeToExecute() bool {
+
+	fmt.Println("sdk/executor/executor.go: findNextNodeToExecute start")
 	// get pipeline
 	pipeline := fexec.flow
 
@@ -643,12 +699,15 @@ func (fexec *FlowExecutor) findNextNodeToExecute() bool {
 			}
 		}
 	}
+
+	fmt.Println("sdk/executor/executor.go: findNextNodeToExecute end")
 	return false
 }
 
 // handleDynamicEnd handles the end of a dynamic node
 func (fexec *FlowExecutor) handleDynamicEnd(context *sdk.Context, result []byte) ([]byte, error) {
 
+	fmt.Println("sdk/executor/executor.go: handleDynamicEnd start")
 	pipeline := fexec.flow
 	currentNode, _ := pipeline.GetCurrentNodeDag()
 
@@ -743,11 +802,14 @@ func (fexec *FlowExecutor) handleDynamicEnd(context *sdk.Context, result []byte)
 		data = []byte("")
 	}
 
+	fmt.Println("sdk/executor/executor.go: handleDynamicEnd end")
 	return data, nil
 }
 
 // handleNextNodes Handle request Response for a faas-flow perform response/async-forward
 func (fexec *FlowExecutor) handleNextNodes(context *sdk.Context, result []byte) ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: handleNextNodes start")
 	// get pipeline
 	pipeline := fexec.flow
 
@@ -827,11 +889,14 @@ func (fexec *FlowExecutor) handleNextNodes(context *sdk.Context, result []byte) 
 	// reset dag execution position
 	pipeline.UpdatePipelineExecutionPosition(sdk.DEPTH_SAME, currentNode.Id)
 
+	fmt.Println("sdk/executor/executor.go: handleNextNodes end")
 	return []byte(""), nil
 }
 
 // handleFailure handles failure with failure handler and call finally
 func (fexec *FlowExecutor) handleFailure(context *sdk.Context, err error) {
+
+	fmt.Println("sdk/executor/executor.go: handleFailure start")
 	var data []byte
 
 	context.State = sdk.StateFailure
@@ -866,10 +931,13 @@ func (fexec *FlowExecutor) handleFailure(context *sdk.Context, err error) {
 	}
 
 	fmt.Sprintf("[Request `%s`] Failed, %v\n", fexec.id, err)
+	fmt.Println("sdk/executor/executor.go: handleFailure end")
 }
 
 // getDagIntermediateData gets the intermediate data from earlier vertex
 func (fexec *FlowExecutor) getDagIntermediateData(context *sdk.Context) ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: getDagIntermediateData start")
 	var data []byte
 
 	pipeline := fexec.flow
@@ -944,12 +1012,14 @@ func (fexec *FlowExecutor) getDagIntermediateData(context *sdk.Context) ([]byte,
 
 	}
 
+	fmt.Println("sdk/executor/executor.go: getDagIntermediateData end")
 	return data, nil
 }
 
 // initializeStore initialize the store
 func (fexec *FlowExecutor) initializeStore() (stateSDefined bool, dataSOverride bool, err error) {
 
+	fmt.Println("sdk/executor/executor.go: initializeStore start")
 	stateSDefined = false
 	dataSOverride = false
 
@@ -987,20 +1057,25 @@ func (fexec *FlowExecutor) initializeStore() (stateSDefined bool, dataSOverride 
 		err = fexec.dataStore.Init()
 	}
 
+	fmt.Println("sdk/executor/executor.go: initializeStore end")
 	return
 }
 
 // createContext create a context from request handler
 func (fexec *FlowExecutor) createContext() *sdk.Context {
+
+	fmt.Println("sdk/executor/executor.go: createContext start")
 	context := sdk.CreateContext(fexec.id, "",
 		fexec.flowName, fexec.dataStore)
 	context.Query, _ = url.ParseQuery(fexec.query)
-
+	fmt.Println("sdk/executor/executor.go: createContext end")
 	return context
 }
 
 // init initialize the executor object and context
 func (fexec *FlowExecutor) init() ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: init start")
 	requestId := ""
 	var requestData []byte
 	var err error
@@ -1120,12 +1195,14 @@ func (fexec *FlowExecutor) init() ([]byte, error) {
 
 	fexec.flowName = fexec.executor.GetFlowName()
 
+	fmt.Println("sdk/executor/executor.go: init end")
 	return requestData, nil
 }
 
 // applyExecutionState apply an execution state
 func (fexec *FlowExecutor) applyExecutionState(state *ExecutionStateOptions) error {
 
+	fmt.Println("sdk/executor/executor.go: applyExecutionState start")
 	switch {
 	case state.newRequest != nil:
 		fexec.partial = false
@@ -1137,16 +1214,22 @@ func (fexec *FlowExecutor) applyExecutionState(state *ExecutionStateOptions) err
 	default:
 		return fmt.Errorf("invalid execution state")
 	}
+	fmt.Println("sdk/executor/executor.go: applyExecutionState end")
 	return nil
 }
 
 // GetReqId get request id
 func (fexec *FlowExecutor) GetReqId() string {
+
+	fmt.Println("sdk/executor/executor.go: GetReqId start")
+	fmt.Println("sdk/executor/executor.go: GetReqId end")
 	return fexec.id
 }
 
 // Execute start faas-flow execution
 func (fexec *FlowExecutor) Execute(state ExecutionStateOption) ([]byte, error) {
+
+	fmt.Println("sdk/executor/executor.go: Execute start")
 	var resp []byte
 	var gerr error
 
@@ -1348,12 +1431,14 @@ func (fexec *FlowExecutor) Execute(state ExecutionStateOption) ([]byte, error) {
 		fexec.eventHandler.Flush()
 	}
 
+	fmt.Println("sdk/executor/executor.go: Execute end")
 	return resp, nil
 }
 
 // Stop marks end of an active dag execution
 func (fexec *FlowExecutor) Stop(reqId string) error {
 
+	fmt.Println("sdk/executor/executor.go: Stop start")
 	fexec.executor.Configure(reqId)
 	fexec.flowName = fexec.executor.GetFlowName()
 	fexec.id = reqId
@@ -1379,12 +1464,14 @@ func (fexec *FlowExecutor) Stop(reqId string) error {
 		fexec.notifyChan <- fexec.id
 	}
 
+	fmt.Println("sdk/executor/executor.go: Stop end")
 	return nil
 }
 
 // Pause pauses an active dag execution
 func (fexec *FlowExecutor) Pause(reqId string) error {
 
+	fmt.Println("sdk/executor/executor.go: Pause start")
 	fexec.executor.Configure(reqId)
 	fexec.flowName = fexec.executor.GetFlowName()
 	fexec.id = reqId
@@ -1405,12 +1492,14 @@ func (fexec *FlowExecutor) Pause(reqId string) error {
 		return fmt.Errorf("[Request `%s`] Failed to mark dag state, error %v", fexec.id, err)
 	}
 
+	fmt.Println("sdk/executor/executor.go: Pause end")
 	return nil
 }
 
 // Resume resumes a paused dag execution
 func (fexec *FlowExecutor) Resume(reqId string) error {
 
+	fmt.Println("sdk/executor/executor.go: Resume start")
 	fexec.executor.Configure(reqId)
 	fexec.flowName = fexec.executor.GetFlowName()
 	fexec.id = reqId
@@ -1439,11 +1528,14 @@ func (fexec *FlowExecutor) Resume(reqId string) error {
 		}
 	}
 
+	fmt.Println("sdk/executor/executor.go: Resume end")
 	return nil
 }
 
 // GetState returns the state of the request
 func (fexec *FlowExecutor) GetState(reqId string) (string, error) {
+
+	fmt.Println("sdk/executor/executor.go: GetState start")
 	fexec.executor.Configure(reqId)
 	fexec.flowName = fexec.executor.GetFlowName()
 	fexec.id = reqId
@@ -1460,13 +1552,16 @@ func (fexec *FlowExecutor) GetState(reqId string) (string, error) {
 		log.Printf("[Request `%s`] Failed to load state, %v. State returned STATE_FINISHED", fexec.id, err)
 		return STATE_FINISHED, nil
 	}
+	fmt.Println("sdk/executor/executor.go: GetState end")
 
 	return state, nil
 }
 
 // CreateFlowExecutor initiate a FlowExecutor with a provided Executor
 func CreateFlowExecutor(executor Executor, notifyChan chan string) (fexec *FlowExecutor) {
-	fexec = &FlowExecutor{executor: executor, notifyChan: notifyChan}
 
+	fmt.Println("sdk/executor/executor.go: CreateFlowExecutor start")
+	fexec = &FlowExecutor{executor: executor, notifyChan: notifyChan}
+	fmt.Println("sdk/executor/executor.go: CreateFlowExecutor end")
 	return fexec
 }

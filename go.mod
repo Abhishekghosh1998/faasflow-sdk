@@ -1,4 +1,4 @@
-module github.com/faasflow/sdk
+module github.com/Abhishekghosh1998/faasflow-sdk
 
 go 1.14
 

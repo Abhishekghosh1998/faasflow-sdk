@@ -3,7 +3,7 @@ package exporter
 import (
 	"fmt"
 
-	sdk "github.com/faasflow/sdk"
+	sdk "github.com/Abhishekghosh1998/faasflow-sdk"
 )
 
 // Exporter
@@ -23,15 +23,19 @@ type FlowExporter struct {
 
 // createContext create a context from request handler
 func (fexp *FlowExporter) createContext() *sdk.Context {
+
+	fmt.Println("sdk/exporter/exporter.go: createContext start")
 	context := sdk.CreateContext("export", "",
 		fexp.flowName, nil)
 
+	fmt.Println("sdk/exporter/exporter.go: createContext end")
 	return context
 }
 
 // Export retrieve faasflow definition
 func (fexp *FlowExporter) Export() ([]byte, error) {
 
+	fmt.Println("sdk/exporter/exporter.go: Export start")
 	// Init flow
 	fexp.flow = sdk.CreatePipeline()
 	fexp.flowName = fexp.exporter.GetFlowName()
@@ -46,13 +50,16 @@ func (fexp *FlowExporter) Export() ([]byte, error) {
 
 	definition := sdk.GetPipelineDefinition(fexp.flow)
 
+	fmt.Println("sdk/exporter/exporter.go: Export end")
 	return []byte(definition), nil
 }
 
 // CreateFlowExporter initiate a FlowExporter with a provided Executor
 func CreateFlowExporter(exporter Exporter) (fexp *FlowExporter) {
+
+	fmt.Println("sdk/exporter/exporter.go: CreateFlowExporter start")
 	fexp = &FlowExporter{}
 	fexp.exporter = exporter
-
+	fmt.Println("sdk/exporter/exporter.go: CreateFlowExporter end")
 	return fexp
 }

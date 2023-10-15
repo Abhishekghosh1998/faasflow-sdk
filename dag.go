@@ -83,10 +83,13 @@ type Node struct {
 
 // NewDag Creates a Dag
 func NewDag() *Dag {
+
+	fmt.Println("sdk/dag.go: NewDag start")
 	this := new(Dag)
 	this.nodes = make(map[string]*Node)
 	this.Id = "0"
 	this.executionFlow = true
+	fmt.Println("sdk/dag.go: NewDag end")
 	return this
 }
 
@@ -94,6 +97,8 @@ func NewDag() *Dag {
 // Its a way to define and reuse subdags
 // append causes disconnected dag which must be linked with edge in order to execute
 func (this *Dag) Append(dag *Dag) error {
+
+	fmt.Println("sdk/dag.go: Append start")
 	for nodeId, node := range dag.nodes {
 		_, duplicate := this.nodes[nodeId]
 		if duplicate {
@@ -102,23 +107,28 @@ func (this *Dag) Append(dag *Dag) error {
 		// add the node
 		this.nodes[nodeId] = node
 	}
+	fmt.Println("sdk/dag.go: Append end")
 	return nil
 }
 
 // AddVertex create a vertex with id and operations
 func (this *Dag) AddVertex(id string, operations []Operation) *Node {
 
+	fmt.Println("sdk/dag.go: AddVertex start")
 	node := &Node{Id: id, operations: operations, index: this.nodeIndex + 1}
 	node.forwarder = make(map[string]Forwarder, 0)
 	node.parentDag = this
 	this.nodeIndex = this.nodeIndex + 1
 	this.nodes[id] = node
+	fmt.Println("sdk/dag.go: AddVertex end")
 	return node
 }
 
 // AddEdge add a directed edge as (from)->(to)
 // If vertex doesn't exists creates them
 func (this *Dag) AddEdge(from, to string) error {
+
+	fmt.Println("sdk/dag.go: AddEdge start")
 	fromNode := this.nodes[from]
 	if fromNode == nil {
 		fromNode = this.AddVertex(from, []Operation{})
@@ -172,36 +182,55 @@ func (this *Dag) AddEdge(from, to string) error {
 
 	this.hasEdge = true
 
+	fmt.Println("sdk/dag.go: AddEdge end")
 	return nil
 }
 
 // GetNode get a node by Id
 func (this *Dag) GetNode(id string) *Node {
+
+	fmt.Println("sdk/dag.go: GetNode start")
+	fmt.Println("sdk/dag.go: GetNode end")
 	return this.nodes[id]
 }
 
 // GetParentNode returns parent node for a subdag
 func (this *Dag) GetParentNode() *Node {
+
+	fmt.Println("sdk/dag.go: GetParentNode start")
+	fmt.Println("sdk/dag.go: GetParentNode end")
 	return this.parentNode
 }
 
 // GetInitialNode gets the initial node
 func (this *Dag) GetInitialNode() *Node {
+
+	fmt.Println("sdk/dag.go: GetInitialNode start")
+	fmt.Println("sdk/dag.go: GetInitialNode end")
 	return this.initialNode
 }
 
 // GetEndNode gets the end node
 func (this *Dag) GetEndNode() *Node {
+
+	fmt.Println("sdk/dag.go: GetEndNode start")
+	fmt.Println("sdk/dag.go: GetEndNode end")
 	return this.endNode
 }
 
 // HasBranch check if dag or its subdags has branch
 func (this *Dag) HasBranch() bool {
+
+	fmt.Println("sdk/dag.go: HasBranch start")
+	fmt.Println("sdk/dag.go: HasBranch end")
 	return this.hasBranch
 }
 
 // HasEdge check if dag or its subdags has edge
 func (this *Dag) HasEdge() bool {
+
+	fmt.Println("sdk/dag.go: HasEdge start")
+	fmt.Println("sdk/dag.go: HasEdge end")
 	return this.hasEdge
 }
 
@@ -209,6 +238,8 @@ func (this *Dag) HasEdge() bool {
 // A validated graph has only one initialNode and one EndNode set
 // if a graph has more than one endnode, a seperate endnode gets added
 func (this *Dag) Validate() error {
+
+	fmt.Println("sdk/dag.go: Validate start")
 	initialNodeCount := 0
 	var endNodes []*Node
 
@@ -310,11 +341,14 @@ func (this *Dag) Validate() error {
 
 	this.validated = true
 
+	fmt.Println("sdk/dag.go: Validate end")
 	return nil
 }
 
 // GetNodes returns a list of nodes (including subdags) belong to the dag
 func (this *Dag) GetNodes(dynamicOption string) []string {
+
+	fmt.Println("sdk/dag.go: GetNodes start")
 	var nodes []string
 	for _, b := range this.nodes {
 		nodeId := ""
@@ -333,100 +367,150 @@ func (this *Dag) GetNodes(dynamicOption string) []string {
 			nodes = append(nodes, subDagNodes...)
 		}
 	}
+	fmt.Println("sdk/dag.go: GetNodes end")
 	return nodes
 }
 
 // IsExecutionFlow check if a dag doesn't use intermediate data
 func (this *Dag) IsExecutionFlow() bool {
+
+	fmt.Println("sdk/dag.go: IsExecutionFlow start")
+	fmt.Println("sdk/dag.go: IsExecutionFlow end")
 	return this.executionFlow
 }
 
 // inSlice check if a node belongs in a slice
 func (this *Node) inSlice(list []*Node) bool {
+
+	fmt.Println("sdk/dag.go: inSlice start")
 	for _, b := range list {
 		if b.Id == this.Id {
 			return true
 		}
 	}
+	fmt.Println("sdk/dag.go: inSlice end")
 	return false
 }
 
 // Children get all children node for a node
 func (this *Node) Children() []*Node {
+
+	fmt.Println("sdk/dag.go: Children start")
+	fmt.Println("sdk/dag.go: Children end")
 	return this.children
 }
 
 // Dependency get all dependency node for a node
 func (this *Node) Dependency() []*Node {
+
+	fmt.Println("sdk/dag.go: Dependency start")
+	fmt.Println("sdk/dag.go: Dependency end")
 	return this.dependsOn
 }
 
 // Value provides the ordered list of functions for a node
 func (this *Node) Operations() []Operation {
+
+	fmt.Println("sdk/dag.go: Operations start")
+	fmt.Println("sdk/dag.go: Operations end")
 	return this.operations
 }
 
 // Indegree returns the no of input in a node
 func (this *Node) Indegree() int {
+
+	fmt.Println("sdk/dag.go: Indegree start")
+	fmt.Println("sdk/dag.go: Indegree end")
 	return this.indegree
 }
 
 // DynamicIndegree returns the no of dynamic input in a node
 func (this *Node) DynamicIndegree() int {
+
+	fmt.Println("sdk/dag.go: DynamicIndegree start")
+	fmt.Println("sdk/dag.go: DynamicIndegree end")
 	return this.dynamicIndegree
 }
 
 // Outdegree returns the no of output in a node
 func (this *Node) Outdegree() int {
+
+	fmt.Println("sdk/dag.go: Outdegree start")
+	fmt.Println("sdk/dag.go: Outdegree end")
 	return this.outdegree
 }
 
 // SubDag returns the subdag added in a node
 func (this *Node) SubDag() *Dag {
+
+	fmt.Println("sdk/dag.go: SubDag start")
+	fmt.Println("sdk/dag.go: SubDag end")
 	return this.subDag
 }
 
 // Dynamic checks if the node is dynamic
 func (this *Node) Dynamic() bool {
+
+	fmt.Println("sdk/dag.go: Dynamic start")
+	fmt.Println("sdk/dag.go: Dynamic end")
 	return this.dynamic
 }
 
 // ParentDag returns the parent dag of the node
 func (this *Node) ParentDag() *Dag {
+
+	fmt.Println("sdk/dag.go: ParentDag start")
+	fmt.Println("sdk/dag.go: ParentDag end")
 	return this.parentDag
 }
 
 // AddOperation adds an operation
 func (this *Node) AddOperation(operation Operation) {
+
+	fmt.Println("sdk/dag.go: AddOperation start")
 	this.operations = append(this.operations, operation)
+	fmt.Println("sdk/dag.go: AddOperation end")
 }
 
 // AddAggregator add a aggregator to a node
 func (this *Node) AddAggregator(aggregator Aggregator) {
+	fmt.Println("sdk/dag.go: AddAggregator start")
 	this.aggregator = aggregator
+	fmt.Println("sdk/dag.go: AddAggregator end")
 }
 
 // AddForEach add a aggregator to a node
 func (this *Node) AddForEach(foreach ForEach) {
+
+	fmt.Println("sdk/dag.go: AddForEach start")
 	this.foreach = foreach
 	this.dynamic = true
 	this.AddForwarder("dynamic", DefaultForwarder)
+	fmt.Println("sdk/dag.go: AddForEach end")
 }
 
 // AddCondition add a condition to a node
 func (this *Node) AddCondition(condition Condition) {
+
+	fmt.Println("sdk/dag.go: AddCondition start")
 	this.condition = condition
 	this.dynamic = true
 	this.AddForwarder("dynamic", DefaultForwarder)
+	fmt.Println("sdk/dag.go: AddCondition end")
 }
 
 // AddSubAggregator add a foreach aggregator to a node
 func (this *Node) AddSubAggregator(aggregator Aggregator) {
+
+	fmt.Println("sdk/dag.go: AddSubAggregator start")
 	this.subAggregator = aggregator
+	fmt.Println("sdk/dag.go: AddSubAggregator end")
 }
 
 // AddForwarder adds a forwarder for a specific children
 func (this *Node) AddForwarder(children string, forwarder Forwarder) {
+
+	fmt.Println("sdk/dag.go: AddForwarder start")
 	this.forwarder[children] = forwarder
 	if forwarder != nil {
 		this.parentDag.dataForwarderCount = this.parentDag.dataForwarderCount + 1
@@ -437,10 +521,13 @@ func (this *Node) AddForwarder(children string, forwarder Forwarder) {
 			this.parentDag.executionFlow = true
 		}
 	}
+	fmt.Println("sdk/dag.go: AddForwarder end")
 }
 
 // AddSubDag adds a subdag to the node
 func (this *Node) AddSubDag(subDag *Dag) error {
+
+	fmt.Println("sdk/dag.go: AddSubDag start")
 	parentDag := this.parentDag
 	// Continue till there is no parent dag
 	for parentDag != nil {
@@ -462,11 +549,14 @@ func (this *Node) AddSubDag(subDag *Dag) error {
 	// Set the node the subdag belongs to
 	subDag.parentNode = this
 
+	this.parentDag.hasBranch = true
 	return nil
 }
 
 // AddForEachDag adds a foreach subdag to the node
 func (this *Node) AddForEachDag(subDag *Dag) error {
+
+	fmt.Println("sdk/dag.go: AddForEachDag start")
 	// Set the subdag in the node
 	this.subDag = subDag
 	// Set the node the subdag belongs to
@@ -475,11 +565,14 @@ func (this *Node) AddForEachDag(subDag *Dag) error {
 	this.parentDag.hasBranch = true
 	this.parentDag.hasEdge = true
 
+	fmt.Println("sdk/dag.go: AddForEachDag end")
 	return nil
 }
 
 // AddConditionalDag adds conditional dag to node
 func (this *Node) AddConditionalDag(condition string, dag *Dag) {
+
+	fmt.Println("sdk/dag.go: AddConditionalDag start")
 	// Set the conditional subdag in the node
 	if this.conditionalDags == nil {
 		this.conditionalDags = make(map[string]*Dag)
@@ -490,53 +583,81 @@ func (this *Node) AddConditionalDag(condition string, dag *Dag) {
 
 	this.parentDag.hasBranch = true
 	this.parentDag.hasEdge = true
+	fmt.Println("sdk/dag.go: AddConditionalDag end")
 }
 
 // GetAggregator get a aggregator from a node
 func (this *Node) GetAggregator() Aggregator {
+
+	fmt.Println("sdk/dag.go: GetAggregator start")
+	fmt.Println("sdk/dag.go: GetAggregator end")
 	return this.aggregator
 }
 
 // GetForwarder gets a forwarder for a children
 func (this *Node) GetForwarder(children string) Forwarder {
+
+	fmt.Println("sdk/dag.go: GetForwarder start")
+	fmt.Println("sdk/dag.go: GetForwarder end")
 	return this.forwarder[children]
 }
 
 // GetSubAggregator gets the subaggregator for condition and foreach
 func (this *Node) GetSubAggregator() Aggregator {
+
+	fmt.Println("sdk/dag.go: GetSubAggregator start")
+	fmt.Println("sdk/dag.go: GetSubAggregator end")
 	return this.subAggregator
 }
 
 // GetCondition get the condition function
 func (this *Node) GetCondition() Condition {
+
+	fmt.Println("sdk/dag.go: GetCondition start")
+	fmt.Println("sdk/dag.go: GetCondition end")
 	return this.condition
 }
 
 // GetForEach get the foreach function
 func (this *Node) GetForEach() ForEach {
+
+	fmt.Println("sdk/dag.go: GetForEach start")
+	fmt.Println("sdk/dag.go: GetForEach end")
 	return this.foreach
 }
 
 // GetAllConditionalDags get all the subdags for all conditions
 func (this *Node) GetAllConditionalDags() map[string]*Dag {
+
+	fmt.Println("sdk/dag.go: GetAllConditionalDags start")
+	fmt.Println("sdk/dag.go: GetAllConditionalDags end")
 	return this.conditionalDags
 }
 
 // GetConditionalDag get the sundag for a specific condition
 func (this *Node) GetConditionalDag(condition string) *Dag {
+
+	fmt.Println("sdk/dag.go: GetConditionalDag start")
 	if this.conditionalDags == nil {
 		return nil
 	}
+	fmt.Println("sdk/dag.go: GetConditionalDag end")
 	return this.conditionalDags[condition]
 }
 
 // generateUniqueId returns a unique ID of node throughout the DAG
 func (this *Node) generateUniqueId(dagId string) string {
+
+	fmt.Println("sdk/dag.go: generateUniqueId start")
+	fmt.Println("sdk/dag.go: generateUniqueId end")
 	// Node Id : <dag-id>_<node_index_in_dag>_<node_id>
 	return fmt.Sprintf("%s_%d_%s", dagId, this.index, this.Id)
 }
 
 // GetUniqueId returns a unique ID of the node
 func (this *Node) GetUniqueId() string {
+
+	fmt.Println("sdk/dag.go: GetUniqueId start")
+	fmt.Println("sdk/dag.go: GetUniqueId end")
 	return this.uniqueId
 }

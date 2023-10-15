@@ -1,6 +1,6 @@
 package sdk
 
-import ()
+import "fmt"
 
 type Operation interface {
 	GetId() string
@@ -14,17 +14,29 @@ type BlankOperation struct {
 }
 
 func (ops *BlankOperation) GetId() string {
+
+	fmt.Println("sdk/operation.go: GetId start")
+	fmt.Println("sdk/operation.go: GetId end")
 	return "end"
 }
 
 func (ops *BlankOperation) Encode() []byte {
+
+	fmt.Println("sdk/operation.go: Encode start")
+	fmt.Println("sdk/operation.go: Encode end")
 	return []byte("")
 }
 
 func (ops *BlankOperation) GetProperties() map[string][]string {
+
+	fmt.Println("sdk/operation.go: GetProperties start")
+	fmt.Println("sdk/operation.go: GetProperties end")
 	return make(map[string][]string)
 }
 
 func (ops *BlankOperation) Execute(data []byte, option map[string]interface{}) ([]byte, error) {
+
+	fmt.Println("sdk/operation.go: Execute start")
+	fmt.Println("sdk/operation.go: Execute end")
 	return data, nil
 }

@@ -2,6 +2,7 @@ package sdk
 
 import (
 	"encoding/json"
+	"fmt"
 )
 
 type DagExporter struct {
@@ -25,7 +26,7 @@ type NodeExporter struct {
 	IsDynamic        bool `json:"is-dynamic"`
 	IsCondition      bool `json:"is-condition"`
 	IsForeach        bool `json:"is-foreach"`
-	HasAggregator     bool `json:"has-aggregator"`
+	HasAggregator    bool `json:"has-aggregator"`
 	HasSubAggregator bool `json:"has-sub-aggregator"`
 	HasSubDag        bool `json:"has-subdag"`
 	InDegree         int  `json:"in-degree"`
@@ -47,11 +48,16 @@ type OperationExporter struct {
 }
 
 func exportOperation(exportOperation *OperationExporter, operation Operation) {
+
+	fmt.Println("sdk/definition.go: exportOperation start")
 	exportOperation.Name = operation.GetId()
 	exportOperation.Properties = operation.GetProperties()
+	fmt.Println("sdk/definition.go: exportOperation end")
 }
 
 func exportNode(exportNode *NodeExporter, node *Node) {
+
+	fmt.Println("sdk/definition.go: exportNode start")
 	exportNode.Id = node.Id
 	exportNode.Index = node.index
 	exportNode.UniqueId = node.uniqueId
@@ -105,9 +111,12 @@ func exportNode(exportNode *NodeExporter, node *Node) {
 			exportNode.ChildrenExecOnly[snode.Id] = false
 		}
 	}
+	fmt.Println("sdk/definition.go: exportNode end")
 }
 
 func exportDag(exportDag *DagExporter, dag *Dag) {
+
+	fmt.Println("sdk/definition.go: exportDag start")
 	exportDag.Id = dag.Id
 	if dag.initialNode != nil {
 		exportDag.StartNode = dag.initialNode.Id
@@ -127,10 +136,13 @@ func exportDag(exportDag *DagExporter, dag *Dag) {
 		exportNode(exportedNode, node)
 		exportDag.Nodes[nodeId] = exportedNode
 	}
+	fmt.Println("sdk/definition.go: exportDag end")
 }
 
 // GetPipelineDefinition generate pipeline DAG defintion as a json
 func GetPipelineDefinition(pipeline *Pipeline) string {
+
+	fmt.Println("sdk/definition.go: GetPipelineDefinition start")
 	root := &DagExporter{}
 
 	// Validate the dag
@@ -143,5 +155,6 @@ func GetPipelineDefinition(pipeline *Pipeline) string {
 
 	exportDag(root, pipeline.Dag)
 	encoded, _ := json.MarshalIndent(root, "", "    ")
+	fmt.Println("sdk/definition.go: GetPipelineDefinition end")
 	return string(encoded)
 }
